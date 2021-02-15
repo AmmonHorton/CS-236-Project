@@ -13,6 +13,7 @@
 #include "TokenFSA.h"
 #include <sstream>
 #include <fstream>
+#include <deque>
 
 class Lexer {
 private:
@@ -22,7 +23,7 @@ private:
     size_t correctArryPos;
     size_t correctCharacters;
 public:
-    deque <TokenFSA*> tokenDeque;
+    deque<TokenFSA*> tokenDeque;
     Lexer(){
         correctArryPos = 0;
         correctCharacters = 0;

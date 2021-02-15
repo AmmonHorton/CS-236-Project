@@ -20,6 +20,7 @@ public:
         selfType = st;
         data = dt;
     }
+    virtual ~TokenItemInterface() {}
     bool operator==(const TokenItemInterface& tc) {return this->selfType == tc.selfType;}
     
     virtual string str() {
@@ -54,7 +55,7 @@ public:
                 delete fsaPtr;
                 fsaPtr = tokenDeque.front();
                 tokenDeque.pop_front();
-                delete tItemPtr;
+                if(tItemPtr) delete tItemPtr;
                 tItemPtr = NULL;
                 return true;
             }
@@ -62,7 +63,7 @@ public:
                 delete tokenDeque.front();
                 tokenDeque.pop_front();
                 delete tItemPtr;
-                tItemPtr = NULL;
+                if(tItemPtr) tItemPtr = NULL;
                 return true;
             }
         }
@@ -72,7 +73,7 @@ public:
                 fsaPtr = NULL;
             }
             delete tItemPtr;
-            tItemPtr = NULL;
+            if(tItemPtr) tItemPtr = NULL;
             return false;
         }
     }
@@ -108,20 +109,20 @@ public:
             if(*listTokenfsaPtr == *tItemPtr) {
                 listTokenfsaDeque.push_back(tokenDeque.front());
                 tokenDeque.pop_front();
-                delete tItemPtr;
+                if(tItemPtr) delete tItemPtr;
                 tItemPtr = NULL;
                 return true;
             }
             else {
                 delete tokenDeque.front();
                 tokenDeque.pop_front();
-                delete tItemPtr;
+                if(tItemPtr) delete tItemPtr;
                 tItemPtr = NULL;
                 return true;
             }
         }
         else {
-            delete tItemPtr;
+            if(tItemPtr) delete tItemPtr;
             tItemPtr = NULL;
             return false;
         }
