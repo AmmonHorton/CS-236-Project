@@ -87,7 +87,7 @@ int main(int argc, const char * argv[]) {
     try {
         Parser parser(tokenItems);
         //parser.SetDomain(domainDeque);
-        outStr << parser.str() << endl;
+        outStr << parser.str();
         os << outStr.str();
     }
     catch (TokenItemInterface* tcPtr) {

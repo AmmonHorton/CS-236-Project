@@ -125,7 +125,7 @@ public:
         
         os << "Domain(" << (domainSet.size()) << "):" << endl;
         for (auto it = domainSet.begin(); it != domainSet.end(); ++it) {
-            os << *it << endl;
+            os << "  " << *it << endl;
         }
         return os.str();
     }
