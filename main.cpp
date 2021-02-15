@@ -9,62 +9,97 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 #include "Tokenizer.h"
-#include "TokenChecks.h"
+#include "TokenFSA.h"
+#include "Parser.h"
+#include "Terminals.h"
 
 using namespace std;
 
 int main(int argc, const char * argv[]) {
     
-    Tokenizer tker;
-    string tempLineStr = ""; //For temporary line assignments
-    string tempStr = "";//For temporary word assignments
+    Lexer lexer;
     ostringstream outStr;
-    size_t lineInFile = 1;
-    size_t lineIncrease = 0;
-    size_t totalTokens = 0;
+    deque<TokenItemInterface*> tokenItems;
+    vector <TokenFSA*> tokenVector;
     
     ifstream inFile(argv[1]);
-    //cout << endl << "Input file is open" << endl << endl;
-    while(inFile)
-    {
-        if(!getline(inFile, tempLineStr)) break;
-        //istringstream is(tempLineStr);
-        while(tempLineStr.size() > 0)
-        {
-            tempStr = tker.IdentifyToken(tempLineStr, lineInFile, inFile.eof());
-            lineIncrease = 0;
-            while(tker.GetNextLine()) {
-                tempStr = tempLineStr;
-                if(!getline(inFile, tempLineStr)) break;
-                lineIncrease++;
-                tempLineStr = tempStr + '\n' + tempLineStr;
-                tempStr = tker.IdentifyToken((tempLineStr), lineInFile, inFile.eof());
-            }
-            outStr << tempStr;
-            totalTokens++;
-            if(tempLineStr.at(0) == ' ' || tempLineStr.at(0) == '\t') {
-                totalTokens--;
-            }
-            tempLineStr.erase(0, tker.GetLengthOfToken());
-            lineInFile += lineIncrease;
-        }
-        lineInFile++;
-        tempStr = "";
-    }
-    outStr << "(EOF,\"\"," << lineInFile << ")" << endl;
-    
-    totalTokens++;
-    //For EOF Token
-    outStr << "Total Tokens = " << totalTokens;
-    
+    lexer.readInput(inFile);
     inFile.close();
+    
+    
+    for(size_t i = lexer.tokenDeque.size(); i > 0; i--) {
+        tokenVector.push_back(lexer.tokenDeque.front());
+        lexer.tokenDeque.pop_front();
+    }
+    
+    for(size_t i = tokenVector.size(); i > 0; i--) {
+        string st = tokenVector.at(i - 1)->selfType;
+        string tokenStr = tokenVector.at(i - 1)->GetToken();
+        if(st == "COMMENT") {
+            delete tokenVector.at(i - 1);
+            tokenVector.erase(tokenVector.begin()+i - 1);
+            //i++;
+            continue;
+        }
+        else {
+            TokenItemInterface* tIIPtr = new TokenItemInterface(st, tokenStr);
+            tokenItems.push_front(tIIPtr);
+        }
+    }
+    
+    
+    
+    /*deque<string> domainDeque;
+    
+    deque<TokenItemInterface*>::iterator it = tokenItems.begin();
+    while(it != tokenItems.end()) {
+        ostringstream os;
+        os << **it;
+        string str = os.str();
+        if(str.substr(0,1) == "'") {
+            //str.erase(0,1);
+            //str.erase(str.end() - 1, str.end());
+            
+            deque<string>::iterator iterator = domainDeque.begin();
+            
+            if(domainDeque.size() != 0){
+                while(iterator != domainDeque.end()) {
+                    string st = *iterator;
+                    if(st == str) break;
+                    iterator++;
+                }
+                if(iterator == domainDeque.end()) domainDeque.push_front(str);
+            }
+            else domainDeque.push_front(str);
+        }
+        it++;
+    }
+    sort(domainDeque.begin(), domainDeque.end());
+    */
+    
+    
+    
+    
+    
+    ostringstream os;
+    try {
+        Parser parser(tokenItems);
+        //parser.SetDomain(domainDeque);
+        outStr << parser.str() << endl;
+        os << outStr.str();
+    }
+    catch (TokenItemInterface* tcPtr) {
+        os << "Failure!" << endl << "  ";
+        os << tokenVector.at(tokenVector.size() - tokenItems.size())->str() << endl;
+    }
     
     
     ofstream outFile(argv[2]);
     //Open the output file
-    outFile << outStr.str();
-    cout << outStr.str();
+    outFile << os.str();
+    cout << os.str();
     //Check status of file
     outFile.close();//*/
     

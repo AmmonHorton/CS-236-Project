@@ -1,89 +1,171 @@
 //
-//  Tokenizer.h
+//  Lexer.h
 //  CS_236_Project_1
 //
 //  Created by AMMON HORTON on 1/26/21.
 //
 
-#ifndef Tokenizer_h
-#define Tokenizer_h
+#ifndef Lexer_h
+#define Lexer_h
 
 #define NUMBER_OF_TOKENS 17
 
-#include "TokenChecks.h"
+#include "TokenFSA.h"
 #include <sstream>
+#include <fstream>
 
-class Tokenizer {
+class Lexer {
 private:
-    TokenCheck* fsaArry[NUMBER_OF_TOKENS];
+    TokenFSA* fsaArry[NUMBER_OF_TOKENS];
     bool inputNxtLine;
     size_t lengthOfToken;
-    struct WinningToken {
-        size_t arryPos = 0;
-        size_t correctCharacters = 0;
-    };
+    size_t correctArryPos;
+    size_t correctCharacters;
 public:
-    Tokenizer(){
-        fsaArry[0] = new UndefinedCheck();
-        fsaArry[1] = new StringCheck();
-        fsaArry[2] = new CommentCheck();
-        fsaArry[3] = new CommaCheck();
-        fsaArry[4] = new PeriodCheck();
-        fsaArry[5] = new Q_MarkCheck();
-        fsaArry[6] = new Left_ParenCheck();
-        fsaArry[7] = new Right_ParenCheck();
-        fsaArry[8] = new ColonCheck();
-        fsaArry[9] = new Colon_DashCheck();
-        fsaArry[10] = new MultiplyCheck();
-        fsaArry[11] = new AddCheck();
-        fsaArry[12] = new SchemesCheck();
-        fsaArry[13] = new FactsCheck();
-        fsaArry[14] = new RulesCheck();
-        fsaArry[15] = new QueriesCheck();
-        fsaArry[16] = new IDCheck();
+    deque <TokenFSA*> tokenDeque;
+    Lexer(){
+        correctArryPos = 0;
+        correctCharacters = 0;
+        fsaArry[0] = new UndefinedFSA();
+        fsaArry[1] = new StringFSA();
+        fsaArry[2] = new CommentFSA();
+        fsaArry[3] = new CommaFSA();
+        fsaArry[4] = new PeriodFSA();
+        fsaArry[5] = new Q_MarkFSA();
+        fsaArry[6] = new Left_ParenFSA();
+        fsaArry[7] = new Right_ParenFSA();
+        fsaArry[8] = new ColonFSA();
+        fsaArry[9] = new Colon_DashFSA();
+        fsaArry[10] = new MultiplyFSA();
+        fsaArry[11] = new AddFSA();
+        fsaArry[12] = new SchemesFSA();
+        fsaArry[13] = new FactsFSA();
+        fsaArry[14] = new RulesFSA();
+        fsaArry[15] = new QueriesFSA();
+        fsaArry[16] = new IDFSA();
         inputNxtLine = false;
         lengthOfToken = 0;
     }
-    ~Tokenizer(void) {
+    ~Lexer(void) {
         for(int i = NUMBER_OF_TOKENS; i > 0; i--) {
-            delete fsaArry[i];
+            delete fsaArry[i - 1];
+        }
+        for(size_t i = tokenDeque.size(); i > 0; i--) {
+            delete tokenDeque.back();
+            tokenDeque.pop_back();
         }
     }
-    string IdentifyToken(string input, size_t line, bool eof = false) {
-        if(input.at(0) == ' ' || input.at(0) == '\t') {
-            lengthOfToken = 1;
-            return "";
-        }
-        WinningToken wt;
-        wt.correctCharacters = fsaArry[0]->GetRead(input, eof);
+    TokenFSA* IdentifyToken(string input, size_t line, bool eof = false) {
+        correctCharacters = fsaArry[0]->GetRead(input, eof);
+        correctArryPos = 0;
         inputNxtLine = false;
         
+        
+        
+        if(input.at(0) == ' ' || input.at(0) == '\t' || input.at(0) == '\n') {
+            lengthOfToken = 1;
+            return NULL;
+        }
+        
         for(int i = 0; i < NUMBER_OF_TOKENS; i++) {
-            if (fsaArry[i]->GetRead(input, eof) > fsaArry[wt.arryPos]->GetRead(input, eof)){
-                wt.arryPos = i;
-                wt.correctCharacters = fsaArry[i]->GetRead(input, eof);
+            if (fsaArry[i]->GetRead(input, eof) > correctCharacters){
+                correctArryPos = i;
+                correctCharacters = fsaArry[i]->GetRead(input, eof);
+                
             }
         }
-        lengthOfToken = wt.correctCharacters;
-        if(wt.arryPos == 0) lengthOfToken = 1;
+        lengthOfToken = correctCharacters;
+        if(correctArryPos == 0 && (input.at(0) != '\'' && input.substr(0,2) != "#|")) {
+            lengthOfToken = 1;
+            fsaArry[correctArryPos]->SetVar(input.substr(0,1), 1, 0);
+        }
+        else if(correctArryPos == 0) {
+            lengthOfToken = input.size();
+            fsaArry[correctArryPos]->SetVar(input, input.size(), 0);
+        }
+        
+        
+        
+        
+        
         //The following Lines of code are messy, but they are used to diffreentiate
         //between certain aspects of undefined/Multiline-stirngs/Multiline-comments
         
-        if((input.size() == 1 && input.at(0) == '\'') || (wt.arryPos == 1 && wt.correctCharacters == input.size() && ((input.at(input.size() - 1)) != '\'' || (input.substr((input.size() - 2), 2) == "''")))) inputNxtLine = true;
-        else if(wt.arryPos == 2 && wt.correctCharacters == input.size() && input.at(1) == '|' && !(input.substr((input.size() - 2), 2) == "|#")) inputNxtLine = true;
-        if(eof && wt.arryPos == 0 && (input.substr(0, 2) == "#|" || input.at(0) == '\'')) {
+        if((input.size() == 1 && input.at(0) == '\'') || (correctArryPos == 1 && correctCharacters == input.size() && ((input.at(input.size() - 1)) != '\'' || (input.substr((input.size() - 2), 2) == "''")))) inputNxtLine = true;
+        else if(correctArryPos == 2 && correctCharacters == input.size() && input.at(1) == '|' && !(input.substr((input.size() - 2), 2) == "|#")) inputNxtLine = true;
+        
+        
+        if(eof && ((correctArryPos == 1 && !fsaArry[1]->accepting) || (correctArryPos == 2 && !fsaArry[2]->accepting)) && (input.substr(0, 2) == "#|" || input.at(0) == '\'')) {
             lengthOfToken = input.size();
-            ostringstream os;
-            os << "(UNDEFINED,\"" << input << "\"" << "," << line << ")" << endl;
-            return os.str();
+            fsaArry[0]->SetVar(input, lengthOfToken, line);
+            return fsaArry[0];
         }
          
-        ostringstream os;
-        os << "(" << fsaArry[wt.arryPos]->str() << "," << line << ")" << endl;
-        return os.str();
+        return fsaArry[correctArryPos];
     }
-    bool GetNextLine() {return inputNxtLine;}
+    void readInput(ifstream &inFile) {
+        TokenFSA* tcPtr;
+        string tempLineStr = ""; //For temporary line assignments
+        string tempStr = "";//For temporary word assignments
+        ostringstream outStr;
+        size_t lineInFile = 1;
+        size_t lineIncrease = 0;
+        size_t totalTokens = 0;
+        
+        while(inFile)
+        {
+            if(!getline(inFile, tempLineStr)) break;
+            while(tempLineStr.size() > 0)
+            {
+                tcPtr = IdentifyToken(tempLineStr, lineInFile, inFile.eof());
+                lineIncrease = 0;
+                while(inputNxtLine) {
+                    tempStr = tempLineStr;
+                    getline(inFile, tempLineStr);
+                    lineIncrease++;
+                    tempLineStr = tempStr + '\n' + tempLineStr;
+                    tcPtr = IdentifyToken((tempLineStr), lineInFile, inFile.eof());
+                }
+                
+                if(tcPtr != NULL) {
+                    tcPtr->SetVar(lineInFile);
+                    AddToDeque(tcPtr);
+                }
+                if(tcPtr != NULL) totalTokens++;
+                if(inFile.eof() && tempLineStr.at(tempLineStr.size() - 1) == '\n') lineInFile--;
+                tempLineStr.erase(0, lengthOfToken);
+                lineInFile += lineIncrease;
+            }
+            lineInFile++;
+            tempStr = "";
+        }
+        tokenDeque.push_back(new EOFFSA("EOF", lineInFile));
+        totalTokens++;
+        //For EOF Token
+    }
+    void AddToDeque(TokenFSA* tcPtr) {
+        if(correctArryPos == 0) tokenDeque.push_back(new UndefinedFSA(*tcPtr));
+        else if(correctArryPos == 1) tokenDeque.push_back(new StringFSA(*tcPtr));
+        else if(correctArryPos == 2) tokenDeque.push_back(new CommentFSA(*tcPtr));
+        else if(correctArryPos == 3) tokenDeque.push_back(new CommaFSA(*tcPtr));
+        else if(correctArryPos == 4) tokenDeque.push_back(new PeriodFSA(*tcPtr));
+        else if(correctArryPos == 5) tokenDeque.push_back(new Q_MarkFSA(*tcPtr));
+        else if(correctArryPos == 6) tokenDeque.push_back(new Left_ParenFSA(*tcPtr));
+        else if(correctArryPos == 7) tokenDeque.push_back(new Right_ParenFSA(*tcPtr));
+        else if(correctArryPos == 8) tokenDeque.push_back(new ColonFSA(*tcPtr));
+        else if(correctArryPos == 9) tokenDeque.push_back(new Colon_DashFSA(*tcPtr));
+        else if(correctArryPos == 10) tokenDeque.push_back(new MultiplyFSA(*tcPtr));
+        else if(correctArryPos == 11) tokenDeque.push_back(new AddFSA(*tcPtr));
+        else if(correctArryPos == 12) tokenDeque.push_back(new SchemesFSA(*tcPtr));
+        else if(correctArryPos == 13) tokenDeque.push_back(new FactsFSA(*tcPtr));
+        else if(correctArryPos == 14) tokenDeque.push_back(new RulesFSA(*tcPtr));
+        else if(correctArryPos == 15) tokenDeque.push_back(new QueriesFSA(*tcPtr));
+        else if(correctArryPos == 16) tokenDeque.push_back(new IDFSA(*tcPtr));
+        return;
+    }
+    
+    
     size_t GetLengthOfToken() {return lengthOfToken;}
 };
 
-#endif /* Tokenizer_h */
+#endif /* Lexer_h */
