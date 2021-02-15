@@ -9,6 +9,7 @@
 #define Terminals_h
 #include <string>
 #include <sstream>
+#include <deque>
 
 class TokenItemInterface {
 private:
