@@ -17,14 +17,15 @@
 using namespace std;
 
 class TokenFSA {
+public:
+    string selfType;
+    bool accepting;
 private:
     string currentInput;
     size_t characterRead;
     size_t linePos;
     bool endOfFile;
 public:
-    string selfType;
-    bool accepting;
     TokenFSA(string st = "TokenFSA", string defaultInput = "", size_t defaultCharacterPos = 0, size_t defaultLine = 0) : selfType(st), currentInput(defaultInput), characterRead(defaultCharacterPos), linePos(defaultLine), endOfFile(false) {}
     virtual ~TokenFSA(void) {}
     
