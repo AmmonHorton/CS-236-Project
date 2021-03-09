@@ -23,7 +23,7 @@ private:
     size_t correctArryPos;
     size_t correctCharacters;
 public:
-    deque<TokenFSA*> tokenDeque;
+    vector<TokenFSA*> tokenVector;
     Lexer(){
         correctArryPos = 0;
         correctCharacters = 0;
@@ -51,9 +51,9 @@ public:
         for(int i = NUMBER_OF_TOKENS; i > 0; i--) {
             delete fsaArry[i - 1];
         }
-        for(size_t i = tokenDeque.size(); i > 0; i--) {
-            delete tokenDeque.back();
-            tokenDeque.pop_back();
+        for(size_t i = tokenVector.size(); i > 0; i--) {
+            delete tokenVector.back();
+            tokenVector.pop_back();
         }
     }
     TokenFSA* IdentifyToken(string input, size_t line, bool eof = false) {
@@ -94,8 +94,6 @@ public:
         
         if((input.size() == 1 && input.at(0) == '\'') || (correctArryPos == 1 && correctCharacters == input.size() && ((input.at(input.size() - 1)) != '\'' || (input.substr((input.size() - 2), 2) == "''")))) inputNxtLine = true;
         else if(correctArryPos == 2 && correctCharacters == input.size() && input.at(1) == '|' && !(input.substr((input.size() - 2), 2) == "|#")) inputNxtLine = true;
-        
-        
         if(eof && ((correctArryPos == 1 && !fsaArry[1]->accepting) || (correctArryPos == 2 && !fsaArry[2]->accepting)) && (input.substr(0, 2) == "#|" || input.at(0) == '\'')) {
             lengthOfToken = input.size();
             fsaArry[0]->SetVar(input, lengthOfToken, line);
@@ -130,7 +128,7 @@ public:
                 
                 if(tcPtr != NULL) {
                     tcPtr->SetVar(lineInFile);
-                    AddToDeque(tcPtr);
+                    AddToVector(tcPtr);
                 }
                 if(tcPtr != NULL) totalTokens++;
                 if(inFile.eof() && tempLineStr.at(tempLineStr.size() - 1) == '\n') lineInFile--;
@@ -140,28 +138,28 @@ public:
             lineInFile++;
             tempStr = "";
         }
-        tokenDeque.push_back(new EOFFSA("EOF", lineInFile));
+        tokenVector.push_back(new EOFFSA("EOF", lineInFile));
         totalTokens++;
         //For EOF Token
     }
-    void AddToDeque(TokenFSA* tcPtr) {
-        if(correctArryPos == 0) tokenDeque.push_back(new UndefinedFSA(*tcPtr));
-        else if(correctArryPos == 1) tokenDeque.push_back(new StringFSA(*tcPtr));
-        else if(correctArryPos == 2) tokenDeque.push_back(new CommentFSA(*tcPtr));
-        else if(correctArryPos == 3) tokenDeque.push_back(new CommaFSA(*tcPtr));
-        else if(correctArryPos == 4) tokenDeque.push_back(new PeriodFSA(*tcPtr));
-        else if(correctArryPos == 5) tokenDeque.push_back(new Q_MarkFSA(*tcPtr));
-        else if(correctArryPos == 6) tokenDeque.push_back(new Left_ParenFSA(*tcPtr));
-        else if(correctArryPos == 7) tokenDeque.push_back(new Right_ParenFSA(*tcPtr));
-        else if(correctArryPos == 8) tokenDeque.push_back(new ColonFSA(*tcPtr));
-        else if(correctArryPos == 9) tokenDeque.push_back(new Colon_DashFSA(*tcPtr));
-        else if(correctArryPos == 10) tokenDeque.push_back(new MultiplyFSA(*tcPtr));
-        else if(correctArryPos == 11) tokenDeque.push_back(new AddFSA(*tcPtr));
-        else if(correctArryPos == 12) tokenDeque.push_back(new SchemesFSA(*tcPtr));
-        else if(correctArryPos == 13) tokenDeque.push_back(new FactsFSA(*tcPtr));
-        else if(correctArryPos == 14) tokenDeque.push_back(new RulesFSA(*tcPtr));
-        else if(correctArryPos == 15) tokenDeque.push_back(new QueriesFSA(*tcPtr));
-        else if(correctArryPos == 16) tokenDeque.push_back(new IDFSA(*tcPtr));
+    void AddToVector(TokenFSA* tcPtr) {
+        if(correctArryPos == 0) tokenVector.push_back(new UndefinedFSA(*tcPtr));
+        else if(correctArryPos == 1) tokenVector.push_back(new StringFSA(*tcPtr));
+        else if(correctArryPos == 2) tokenVector.push_back(new CommentFSA(*tcPtr));
+        else if(correctArryPos == 3) tokenVector.push_back(new CommaFSA(*tcPtr));
+        else if(correctArryPos == 4) tokenVector.push_back(new PeriodFSA(*tcPtr));
+        else if(correctArryPos == 5) tokenVector.push_back(new Q_MarkFSA(*tcPtr));
+        else if(correctArryPos == 6) tokenVector.push_back(new Left_ParenFSA(*tcPtr));
+        else if(correctArryPos == 7) tokenVector.push_back(new Right_ParenFSA(*tcPtr));
+        else if(correctArryPos == 8) tokenVector.push_back(new ColonFSA(*tcPtr));
+        else if(correctArryPos == 9) tokenVector.push_back(new Colon_DashFSA(*tcPtr));
+        else if(correctArryPos == 10) tokenVector.push_back(new MultiplyFSA(*tcPtr));
+        else if(correctArryPos == 11) tokenVector.push_back(new AddFSA(*tcPtr));
+        else if(correctArryPos == 12) tokenVector.push_back(new SchemesFSA(*tcPtr));
+        else if(correctArryPos == 13) tokenVector.push_back(new FactsFSA(*tcPtr));
+        else if(correctArryPos == 14) tokenVector.push_back(new RulesFSA(*tcPtr));
+        else if(correctArryPos == 15) tokenVector.push_back(new QueriesFSA(*tcPtr));
+        else if(correctArryPos == 16) tokenVector.push_back(new IDFSA(*tcPtr));
         return;
     }
     

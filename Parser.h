@@ -13,11 +13,13 @@
 #include <sstream>
 #include <string>
 #include "TokenFSA.h"
-#include "NonTerminals.h"
+#include "Elements.h"
+#include "ElementParentClasses.h"
 
 class DatalogProgram {
-private:
-    TokenItemInterface* tItemPtr;
+public:
+//private:
+    ProductionElementBase* tItemPtr;
     Scheme scheme;
     SchemeList schemeList;
     FactList factList;
@@ -36,67 +38,65 @@ public:
         }
     }
     
-    bool isValid(deque<TokenItemInterface*> &tokenDeque) {
+    bool isValid(deque<ProductionElementBase*> &productionElementDeque) {
         
         //Checking against all Schemes
         
-        tItemPtr = new TokenItemInterface("SCHEMES");
-        if(!(CheckForToken(tokenDeque))) return false;
+        tItemPtr = new ProductionElementBase("SCHEMES");
+        if(!(CheckForToken(productionElementDeque))) return false;
         
-        tItemPtr = new TokenItemInterface("COLON");
-        if(!(CheckForToken(tokenDeque))) return false;
+        tItemPtr = new ProductionElementBase("COLON");
+        if(!(CheckForToken(productionElementDeque))) return false;
         
-        if(!(scheme.isValid(tokenDeque))) return false;
-        if(!(schemeList.isValid(tokenDeque))) return false;
+        if(!(scheme.isValid(productionElementDeque))) return false;
+        if(!(schemeList.isValid(productionElementDeque))) return false;
         
         //Checking against all facts
         
-        tItemPtr = new TokenItemInterface("FACTS");
-        if(!(CheckForToken(tokenDeque))) return false;
+        tItemPtr = new ProductionElementBase("FACTS");
+        if(!(CheckForToken(productionElementDeque))) return false;
         
-        tItemPtr = new TokenItemInterface("COLON");
-        if(!(CheckForToken(tokenDeque))) return false;
+        tItemPtr = new ProductionElementBase("COLON");
+        if(!(CheckForToken(productionElementDeque))) return false;
         
-        if(!(factList.isValid(tokenDeque))) {
-            return false;
-        }
+        if(!(factList.isValid(productionElementDeque))) return false;
         
         
         //Checking against all rules
         
-        tItemPtr = new TokenItemInterface("RULES");
-        if(!(CheckForToken(tokenDeque))) return false;
+        tItemPtr = new ProductionElementBase("RULES");
+        if(!(CheckForToken(productionElementDeque))) return false;
         
-        tItemPtr = new TokenItemInterface("COLON");
-        if(!(CheckForToken(tokenDeque))) return false;
+        tItemPtr = new ProductionElementBase("COLON");
+        if(!(CheckForToken(productionElementDeque))) return false;
         
-        if(!(ruleList.isValid(tokenDeque))) return false;
+        if(!(ruleList.isValid(productionElementDeque))) return false;
         
         //Checking against all queries
         
-        tItemPtr = new TokenItemInterface("QUERIES");
-        if(!(CheckForToken(tokenDeque))) return false;
+        tItemPtr = new ProductionElementBase("QUERIES");
+        if(!(CheckForToken(productionElementDeque))) return false;
         
-        tItemPtr = new TokenItemInterface("COLON");
-        if(!(CheckForToken(tokenDeque))) return false;
+        tItemPtr = new ProductionElementBase("COLON");
+        if(!(CheckForToken(productionElementDeque))) return false;
         
-        if(!(query.isValid(tokenDeque))) return false;
-        if(!(queryList.isValid(tokenDeque))) return false;
+        if(!(query.isValid(productionElementDeque))) return false;
+        if(!(queryList.isValid(productionElementDeque))) return false;
         
         //Checking for EOF
         
-        tItemPtr = new TokenItemInterface("EOF");
-        if(!(CheckForToken(tokenDeque))) return false;
+        tItemPtr = new ProductionElementBase("EOF");
+        if(!(CheckForToken(productionElementDeque))) return false;
         
         domainSet = factList.GetDomain();
         
         return true;
     }
     
-    bool CheckForToken(deque<TokenItemInterface*> &tokenDeque) {
-        if(*tokenDeque.front() == *tItemPtr) {
-            delete tokenDeque.front();
-            tokenDeque.pop_front();
+    bool CheckForToken(deque<ProductionElementBase*> &productionElementDeque) {
+        if(*productionElementDeque.front() == *tItemPtr) {
+            delete productionElementDeque.front();
+            productionElementDeque.pop_front();
             delete tItemPtr;
             tItemPtr = NULL;
             return true;
@@ -108,18 +108,18 @@ public:
         }
     }
     
-    string str() {
+    string const str() {
         ostringstream os;
         
         os << "Success!" << endl;
-        os << "Schemes(" << (1 + schemeList.GetSizeOfList()) << "):" << endl;
+        os << "Schemes(" << (1 + schemeList.size()) << "):" << endl;
         os << scheme.str() << endl;
         os << schemeList.str();
-        os << "Facts(" << factList.GetSizeOfList() << "):" << endl;
+        os << "Facts(" << factList.size() << "):" << endl;
         os << factList.str();
-        os << "Rules(" << ruleList.GetSizeOfList() << "):" << endl;
+        os << "Rules(" << ruleList.size() << "):" << endl;
         os << ruleList.str();
-        os << "Queries(" << (1 + queryList.GetSizeOfList()) << "):" << endl;
+        os << "Queries(" << (1 + queryList.size()) << "):" << endl;
         os << query.str() << endl;
         os << queryList.str();
         
@@ -134,30 +134,20 @@ public:
 
 
 class Parser {
-private:
+public:
+//private:
     DatalogProgram dp;
 public:
-    Parser(deque<TokenItemInterface*> &tokenDeque) {
-        if(!(dp.isValid(tokenDeque))) {
-            throw tokenDeque.front();
+    Parser() {}
+    void CheckTokens(deque<ProductionElementBase*> &productionElementDeque) {
+        if(!(dp.isValid(productionElementDeque))) {
+            throw productionElementDeque.front();
         }
         return;
     }
-    /*void SetDomain(deque<string> &tokenDeque) {
-        domainDeque = tokenDeque;
-        return;
-    }*/
     string str() {
         ostringstream os;
         os << dp.str();
-        /*if(domainDeque.size() > 0) {
-            os << "Domain(" << domainDeque.size() << "):" << endl;
-            deque<string>::iterator it = domainDeque.begin();
-            while(it != domainDeque.end()) {
-                os << "  " << *it << endl;
-                it++;
-            }
-        }*/
         return os.str();
     }
     
