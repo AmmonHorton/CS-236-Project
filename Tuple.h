@@ -25,11 +25,13 @@ public:
     size_t size() {
         return tupleObjects.size();
     }
-    string operator[] (size_t index) {
+    T& operator[] (size_t index) {
         if (index >= size()) throw string("Array index out of bound, exiting");
         return tupleObjects[index];
     }
-    bool operator<(const Tuple& rhs) {
+    
+    
+    bool operator<(const Tuple& rhs) const {
         if(tupleObjects.size() < rhs.tupleObjects.size()) return true;
         else if(tupleObjects.size() > rhs.tupleObjects.size()) return false;
         else {
@@ -37,10 +39,11 @@ public:
                 if(tupleObjects[i] < rhs.tupleObjects[i]) return true;
                 if(tupleObjects[i] > rhs.tupleObjects[i]) return false;
             }
-            return true;
+            return false;
         }
     }
-    bool operator==(const Tuple& rhs) {
+    
+    bool operator==(const Tuple& rhs) const {
         if(tupleObjects.size() != rhs.tupleObjects.size()) return false;
         else {
             for(size_t i = 0; i < tupleObjects.size(); i++) {
@@ -49,6 +52,9 @@ public:
         }
         return true;
     }
+    
+    
+    
     void switch_columns(size_t index1, size_t index2) {
         T tempObject;
         tempObject = tupleObjects[index1];

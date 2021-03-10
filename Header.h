@@ -16,7 +16,7 @@ public:
     size_t size() const {
         return attributeNames.size();
     }
-    string operator[] (size_t index) {
+    string& operator[] (size_t index) {
         if (index >= size()) throw string("Array index out of bound, exiting");
         return attributeNames[index];
     }

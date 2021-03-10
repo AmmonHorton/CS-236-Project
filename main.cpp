@@ -53,8 +53,9 @@ int main(int argc, const char * argv[]) {
     try {
         parser.CheckTokens(productionElementsDeque);
         outStr << parser.str();
-        os << outStr.str();
+        //os << outStr.str();
         Database database(parser.dp);
+        os << database.str();
     }
     catch (ProductionElementBase* tcPtr) {
         os << "Failure!" << endl << "  ";

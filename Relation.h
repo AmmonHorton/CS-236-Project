@@ -20,8 +20,8 @@
 class Relation {
 private:
     string name;
-    Header header;
 public:
+    Header header;
     set<Tuple<string>> tuples;
     Relation(string name, Header& header) {
         this->name = name;
@@ -37,6 +37,9 @@ public:
         tuples.insert(tuple);
         return tuple;
     }
+    bool is_empty() {return tuples.size() == 0;}\
+    size_t size() {return tuples.size();}
+    
     Relation project(Header newHeader) {
         Relation newRelation(name, newHeader);
         /*for(size_t  k = 0; k < tuples.size(); k++) {
@@ -61,7 +64,7 @@ public:
         
         for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
             Tuple<string> tuple;
-            for(size_t  i = 0; i < header.size(); i++) {
+            for(size_t  i = 0; i < newHeader.size(); i++) {
                 size_t j = 0;
                 while(header[j++] != newHeader[i]) {if(j >= header.size()) throw string("Attribute does not exist or exists more than once: " + newHeader[i]);}
                 j--;
@@ -114,6 +117,21 @@ public:
         for(size_t  i = 0; i < header.size(); i++) {
             if(header[i] == oldAttributeName) header[i] = newAttributeName;
         }
+    }
+    
+    string str() {
+        size_t i = 0;
+        ostringstream os;
+        for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
+            os << "  ";
+            for(size_t j = 0; j < header.size(); j++) {
+                Tuple<string> tuple = *it;
+                os << header[j] << "=" << tuple[j] << ((j == header.size() - 1)? "" : ", ");
+            }
+            os << endl;
+            i++;
+        }
+        return os.str();
     }
 };
 
