@@ -143,12 +143,14 @@ public:
                     for(size_t k = 0; k < variableArgumentsSet.size(); k++) {
                         finalProject.push_back("");
                     }
-                    
+                    size_t l = 0;
                     for(size_t k = 0; k < variableArguments.size(); k++) {
                         if(variableArgumentsSet.find(variableArguments[k]) != variableArgumentsSet.end()) {
                             variableArgumentsSet.erase(variableArguments[k]);
-                            finalProject[k] = (variableArguments[k]);
+                            finalProject[l] = (variableArguments[k]);
                         }
+                        else {l--;}
+                        l++;
                     }
                     
                     for(size_t k = 0; k < variableArguments.size(); k++) {
