@@ -56,7 +56,7 @@ public:
                 if(substr.at(0) != '\'') throw string("Argument for Fact: " + fact + " is not a valid string");
                 tuple.push_back(substr);
             }
-            for(int j = 0; j < relations.size(); j++) {
+            for(size_t j = 0; j < relations.size(); j++) {
                 if(relations[j].get_name() == fact){
                     relations[j].insert(tuple);
                     break;
@@ -85,7 +85,7 @@ public:
                 tuple.push_back(substr);
             }
             
-            for(int j = 0; j < relations.size(); j++) {
+            for(size_t j = 0; j < relations.size(); j++) {
                 if(relations[j].get_name() == query){
                     
                     //do stuff with queries and analyze and whatnot
