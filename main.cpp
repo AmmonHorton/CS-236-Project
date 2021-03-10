@@ -65,12 +65,12 @@ int main(int argc, const char * argv[]) {
     
     
     
-    ofstream outFile(argv[2]);
+    //ofstream outFile(argv[2]);
     //Open the output file
-    outFile << os.str();
+    //outFile << os.str();
     cout << os.str();
     //Check status of file
-    outFile.close();//*/
+    //outFile.close();//*/
     
     return 0;
 }
