@@ -151,12 +151,8 @@ public:
                             
                             if(variableTuple.size() != tmpRelation.header.size()) throw string("Rule predicate has wrong number of arguments");
                             
-                            for(size_t k = 0; k < tuple.size(); k++) {
-                                for(size_t p = 0; p < tmpRelation.header.size(); p++) {
-                                    if(tuple[k] == variableTuple[p]) {
-                                        tmpRelation = tmpRelation.rename(tmpRelation.header[p], tuple[k]);
-                                    }
-                                }
+                            for(size_t p = 0; p < tmpRelation.header.size(); p++) {
+                                tmpRelation = tmpRelation.rename(tmpRelation.header[p], variableTuple[p]);
                             }
                             relationsToJoin.push_back(tmpRelation);
                             break;
