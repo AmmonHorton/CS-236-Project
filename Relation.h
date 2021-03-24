@@ -23,10 +23,24 @@ private:
 public:
     Header header;
     set<Tuple<string>> tuples;
-    Relation(string name, Header& header) {
+    Relation(string name, Header header) {
         this->name = name;
         this->header = header;
     }
+    Relation() {
+        this->name = "";
+        Header newHeader;
+        this->header = newHeader;
+    }
+    
+    /*Relation(Relation& relation) {
+        header = relation.header;
+        name = relation.get_name();
+        for (set<Tuple<string>>::iterator it = relation.tuples.begin() ; it != relation.tuples.end(); ++it) {
+            Tuple<string> tuple = *it;
+            tuples.insert(tuple);
+        }
+    }*/
     
     string get_name() {return name;}
     
@@ -42,25 +56,6 @@ public:
     
     Relation project(Header newHeader) {
         Relation newRelation(name, newHeader);
-        /*for(size_t  k = 0; k < tuples.size(); k++) {
-            Tuple<string> tuple;
-            for(size_t  i = 0; i < header.size(); i++) {
-                size_t j = i;
-                while(header[j++] != newHeader[i]) {if(j >= header.size()) throw string("Attribute does not exist or exists more than once: " + newHeader[i]);}
-                j--;
-                if(j != i) {
-                    string tmpStr = header[i];
-                    header[i] = header[j];
-                    header[j] = tmpStr;
-                }
-                //must change for sets
-                tuple.push_back(tuples[k].select_column(j));
-            }
-            //must change for sets
-            newRelation.tuples.push_back(tuple);
-        }*/
-        
-        
         
         for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
             Tuple<string> tuple;
@@ -68,11 +63,6 @@ public:
                 size_t j = 0;
                 while(header[j++] != newHeader[i]) {if(j >= header.size()) throw string("Attribute does not exist or exists more than once: " + newHeader[i]);}
                 j--;
-                /*if(j != i) {
-                    string tmpStr = header[i];
-                    header[i] = header[j];
-                    header[j] = tmpStr;
-                }*/
                 string tmpStr = it->select_column(j);
                 tuple.push_back(tmpStr);
             }
@@ -84,12 +74,6 @@ public:
     
     Relation select_const(size_t index1, string value) {
         Relation newRelation(name, header);
-        /*for(size_t  k = 0; k < tuples.size(); k++) {
-            Tuple<string> tuple;
-            //must change for sets
-            if(tuples[k].select_row(index1, value)) newRelation.tuples.push_back(tuples[k]);
-        }*/
-        
         
         for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
             Tuple<string> tuple = *it;
@@ -98,13 +82,20 @@ public:
         }
         return newRelation;
     }
-    Relation select_same_columns(size_t index1, size_t index2) {
+    
+    Relation select_no_similar_const(size_t index1, string value) {
         Relation newRelation(name, header);
-        /*for(size_t  k = 0; k < tuples.size(); k++) {
-            Tuple<string> tuple;
+        
+        for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
+            Tuple<string> tuple = *it;
             //must change for sets
-            if(tuples[k].select_column(index1) == tuples[k].select_column(index2)) newRelation.tuples.push_back(tuples[k]);
-        }*/
+            if(!(it->select_row(index1, value))) newRelation.tuples.insert(tuple);
+        }
+        return newRelation;
+    }
+    
+    Relation select_rows_with_same_columns(size_t index1, size_t index2) {
+        Relation newRelation(name, header);
         
         for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
             Tuple<string> tuple = *it;
@@ -113,10 +104,161 @@ public:
         }
         return newRelation;
     }
-    void rename(string oldAttributeName, string newAttributeName)  {
-        for(size_t  i = 0; i < header.size(); i++) {
-            if(header[i] == oldAttributeName) header[i] = newAttributeName;
+    
+    Relation Difference(Relation relation) {
+        Relation newRelation(name, header);
+        bool tmpBool;
+        //intersection of columns with same attribute names
+        for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
+            Tuple<string> tuple = *it;
+            tmpBool = false;
+            for (set<Tuple<string>>::iterator iterator = relation.tuples.begin() ; iterator != relation.tuples.end(); ++iterator) {
+                if(*it == *iterator) tmpBool = true;
+            }
+            if(!(tmpBool))newRelation.insert(tuple);
         }
+        return newRelation;
+    }
+    
+    Relation join(Relation relation) {
+        Relation tmpRelation(name, header);
+        Relation argRelation = relation;
+        for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
+            Tuple<string> tuple = *it;
+            tmpRelation.tuples.insert(tuple);
+        }
+        
+        
+        
+        vector<Relation> tmpRelations;
+        vector<Relation> argRelations;
+        
+        set<string> sameAttributes;
+        
+        //intersection of columns with same attribute names
+        for(size_t i = 0; i < header.size(); i++) {
+            for(size_t j = 0; j < relation.header.size(); j++) {
+                if(header[i] == relation.header[j]) {
+                    for (set<Tuple<string>>::iterator it = argRelation.tuples.begin() ; it != argRelation.tuples.end(); ++it) {
+                        Tuple<string> tuple = *it;
+                        //must change for sets
+                        tmpRelations.push_back(tmpRelation.select_const(i, tuple[j]));
+                    }
+                    for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
+                        Tuple<string> tuple = *it;
+                        //must change for sets
+                        argRelations.push_back(argRelation.select_const(j, tuple[i]));
+                    }
+                    sameAttributes.insert(header[i]);
+                }
+            }
+        }
+        
+        if(tmpRelations.size() != 0) {
+            tmpRelation = tmpRelations[0];
+            for(size_t t = 1; t < tmpRelations.size(); t++) {
+                tmpRelation = tmpRelation.relation_union(tmpRelations[t]);
+            }
+        }
+        if(argRelations.size() != 0) {
+            argRelation = argRelations[0];
+            for(size_t t = 1; t < argRelations.size(); t++) {
+                argRelation = argRelation.relation_union(argRelations[t]);
+            }
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        Relation tmpRelation1;
+        tmpRelation1 = tmpRelation.cartesian_product(argRelation);
+        Relation newRelation(name, tmpRelation1.header);
+        
+        if(sameAttributes.size() != 0) {
+            for(size_t i = 0; (i < tmpRelation1.header.size() - 1); i++) {
+                for(size_t t = (i + 1); t < tmpRelation1.header.size(); t++) {
+                    if(tmpRelation1.header[i] == tmpRelation1.header[t] && (sameAttributes.find(tmpRelation1.header[i]) != sameAttributes.end())) {
+                        for (set<Tuple<string>>::iterator it = tmpRelation1.tuples.begin() ; it != tmpRelation1.tuples.end(); ++it) {
+                            Tuple<string> tuple = *it;
+                            if(it->select_column(i) == it->select_column(t)) newRelation.insert(tuple);
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            for (set<Tuple<string>>::iterator it = tmpRelation1.tuples.begin() ; it != tmpRelation1.tuples.end(); ++it) {
+                Tuple<string> tuple = *it;
+                newRelation.insert(tuple);
+            }
+        }
+        
+        
+        Header newHeader = argRelation.header;
+        for(size_t i = 0; i < newHeader.size(); i++) {
+            for (set<string>::iterator it = sameAttributes.begin() ; it != sameAttributes.end(); ++it) {
+                if(newHeader[i] == *it)newHeader.erase(i);
+            }
+        }
+        Header projectHeader;
+        
+        for(size_t i = 0; i < tmpRelation.header.size();i++) {
+            projectHeader.push_back(tmpRelation.header[i]);
+        }
+        for(size_t i = 0; i < newHeader.size();i++) {
+            projectHeader.push_back(newHeader[i]);
+        }
+        newRelation = newRelation.project(projectHeader);
+        
+        
+        return newRelation;
+    }
+    
+    Relation cartesian_product(Relation relation) {
+        if(relation.is_empty()) return *this;
+        if(is_empty()) return relation;
+        Header newHeader = header;
+        
+        for(size_t j = 0; j < relation.header.size(); j++) {
+            newHeader.push_back(relation.header[j]);
+        }
+        Relation newRelation(name, newHeader);
+        for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
+            for (set<Tuple<string>>::iterator iterator = relation.tuples.begin() ; iterator != relation.tuples.end(); ++iterator) {
+                newRelation.insert(*it + *iterator);
+            }
+        }
+        return newRelation;
+    }
+    
+    
+    Relation relation_union(Relation relation) {
+        Relation newRelation = *this;
+        for (set<Tuple<string>>::iterator iterator = relation.tuples.begin() ; iterator != relation.tuples.end(); ++iterator) {
+            newRelation.insert(*iterator);
+        }
+        return newRelation;
+    }
+    
+    Relation rename(string oldAttributeName, string newAttributeName)  {
+        Relation newRelation(name, header);
+            for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
+                newRelation.tuples.insert(*it);
+            }
+        
+        
+        for(size_t  i = 0; i < newRelation.header.size(); i++) {
+            if(newRelation.header[i] == oldAttributeName) {
+                newRelation.header[i] = newAttributeName;
+                break;
+            }
+        }
+        
+        return newRelation;
     }
     
     string str() {

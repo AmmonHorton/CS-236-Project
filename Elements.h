@@ -523,6 +523,9 @@ public:
     string str() const {
         return "  " + headPredicate->str() + " :- " + predicate->str() + predicateList.str() + ".";
     }
+    PredicateList get_predicates() {
+        return predicateList;
+    }
 };
 
 class Query : public ProductionElement{

@@ -24,6 +24,10 @@ public:
         attributeNames.push_back(str);
         return str;
     }
+    void erase(size_t index) {
+        if (index >= size()) throw string("Array index out of bound, exiting");
+        attributeNames.erase(attributeNames.begin() + index);
+    }
 };
 
 #endif /* Header_h */

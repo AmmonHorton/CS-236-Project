@@ -53,7 +53,18 @@ public:
         return true;
     }
     
+    Tuple operator+(const Tuple rhs) const {
+        Tuple tuple = *this;
+        for(size_t i = 0; i < rhs.tupleObjects.size(); i++) {
+            tuple.tupleObjects.push_back(rhs.tupleObjects[i]);
+        }
+        return tuple;
+    }
     
+    void erase(size_t index) {
+        if (index >= size()) throw string("Array index out of bound, exiting");
+        tupleObjects.erase(tupleObjects.begin() + index);
+    }
     
     void switch_columns(size_t index1, size_t index2) {
         T tempObject;
