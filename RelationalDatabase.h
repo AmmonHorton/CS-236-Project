@@ -338,7 +338,7 @@ public:
     
     void removeSpaces(string& str)
     {
-        for (int i = 0; i < str.size(); i++) {
+        for (size_t i = 0; i < str.size(); i++) {
             if (str[i] == ' ') {
                 str.erase(i,1);
                 i--;
