@@ -1,12 +1,12 @@
 # COPYRIGHT © BRIGHAM YOUNG UNIVERSITY CS 236
 # FOR USE ONLY DURING FALL 2020 SEMESTSER
 Schemes:
-   ancestorOf(A,B)
-   childOf(A,B)
-   relativeOf(A,B)
-   descendantOf(A,B)
-   marriedTo(A,B)
-   siblingOf(A,B)
+   ancestorOf(x,y)
+   childOf(x,y)
+   relativeOf(x,y)
+   descendantOf(x,y)
+   marriedTo(x,y)
+   siblingOf(x,y)
 Facts:
    marriedTo('Zed','Bea').
    marriedTo('Jack','Jill').
@@ -19,7 +19,6 @@ Facts:
    childOf('Tim','Jack').
    childOf('Sue','Jack').
    childOf('Anne','Jill').
-   childOf('Anna','Dan').
    childOf('Stan','Jan').
    childOf('Dan','Jan').
    childOf('Lou','Jane').
@@ -37,14 +36,18 @@ Rules:
    ancestorOf(X,Y):-descendantOf(Y,X).
    relativeOf(X,Y):-descendantOf(X,Z),descendantOf(Y,Z).
 Queries:
-   marriedTo(Y,'Jan')?
-   childOf(Y,'Jack')?
-   siblingOf(Y,X)?
-   descendantOf(Y,X)?
-   ancestorOf(Y,X)?
-   relativeOf(Y,X)?
-   marriedTo('Dan',X)?
-   marriedTo('Ned',X)?
-   childOf('Anna',X)?
-   childOf(Y,'Dan')?
- 
+   marriedTo('Bea','Zed')?
+   childOf('Jill','Bea')?
+   siblingOf('Ron','Anna')?
+   siblingOf('Tim','Sue')?
+   siblingOf('Tim',X)?
+   descendantOf('Lou','Zed')?
+   descendantOf('Zed','Lou')?
+   descendantOf('Lou',X)?
+   ancestorOf('Tom','Bea')?
+   ancestorOf('Bea','Tom')?
+   ancestorOf('Bea',X)?
+   relativeOf('Mary','Lou')?
+   relativeOf('Mary','Bill')?
+   relativeOf('Mary','Anna')?
+   relativeOf('Mary','Kim')? 

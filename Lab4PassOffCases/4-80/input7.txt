@@ -1,16 +1,16 @@
 # COPYRIGHT © BRIGHAM YOUNG UNIVERSITY CS 236
 # FOR USE ONLY DURING FALL 2020 SEMESTSER
 Schemes:
-   snap(W,X,Y,Z)
-   csg(X,Y,Z)
-   cp(X,Y)
-   cdh(X,Y,Z)
-   cr(X,Y)
-   before(X,Y)
-   mwfCourses(X,Y)
-   Schedule(V,W,X,Y,Z)
-   Grades(X,Y,Z)
-   Roll(V,W,X,Y,Z)
+   snap(s,n,a,p)
+   csg(c,s,g)
+   cp(c,q)
+   cdh(x,y,z)
+   cr(x,y)
+   before(cc1,cc2)
+   mwfCourses(c,r)
+   Schedule(n,c,r,d,h)
+   Grades(n,c,g)
+   Roll(c,r,n,s,g)
 
 Facts:
    snap('1234','Charley','Apple St','555-1234'). 
@@ -81,4 +81,3 @@ Queries:
    Roll('CS101',Room,Name,Id,Grade)? 
    Roll('EE200',Room,Name,Id,Grade)? 
    Roll('PH100',Room,Name,Id,Grade)?
- 
