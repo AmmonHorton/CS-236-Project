@@ -122,10 +122,14 @@ public:
     
     Relation join(Relation relation) {
         Relation tmpRelation(name, header);
-        Relation argRelation = relation;
+        Relation argRelation(relation.name, relation.header);
         for (set<Tuple<string>>::iterator it = tuples.begin() ; it != tuples.end(); ++it) {
             Tuple<string> tuple = *it;
             tmpRelation.tuples.insert(tuple);
+        }
+        for (set<Tuple<string>>::iterator it = relation.tuples.begin() ; it != relation.tuples.end(); ++it) {
+            Tuple<string> tuple = *it;
+            argRelation.tuples.insert(tuple);
         }
         
         
@@ -135,7 +139,18 @@ public:
         
         set<string> sameAttributes;
         
+        
+        
+        //from here to
         //intersection of columns with same attribute names
+        for(size_t i = 0; i < header.size(); i++) {
+            for(size_t j = 0; j < relation.header.size(); j++) {
+                if(header[i] == relation.header[j]) {
+                    sameAttributes.insert(header[i]);
+                }
+            }
+        }
+        
         for(size_t i = 0; i < header.size(); i++) {
             for(size_t j = 0; j < relation.header.size(); j++) {
                 if(header[i] == relation.header[j]) {
@@ -149,7 +164,6 @@ public:
                         //must change for sets
                         argRelations.push_back(argRelation.select_const(j, tuple[i]));
                     }
-                    sameAttributes.insert(header[i]);
                 }
             }
         }
@@ -167,15 +181,69 @@ public:
             }
         }
         
+        //here needs to be rethought
+        //We are trying to get the intersection of only the columns that matter
         
         
         
         
         
+        
+        
+        
+        
+        
+
+        vector<size_t> variablePositions;
+        vector<string> variableArguments;
+        for(size_t k = 0; k < tmpRelation.header.size(); k++) {
+            variableArguments.push_back(tmpRelation.header[k]);
+            variablePositions.push_back(k);
+        }
+        for(size_t k = 0; k < argRelation.header.size(); k++) {
+            variableArguments.push_back(argRelation.header[k]);
+            variablePositions.push_back(k + tmpRelation.header.size());
+        }
+        
+        set<string> variableArgumentsSet;
+        for(size_t k = 0; k < variablePositions.size();k++) {
+            variableArgumentsSet.insert(variableArguments[k]);
+        }
+        
+        vector<Tuple<size_t>> modePositions;
+        //go through set and asisgn each row of the 2d vector as a tuple of the variable's multiple positions throughout the query
+        
+        for (set<string>::iterator it = variableArgumentsSet.begin(); it != variableArgumentsSet.end(); ++it) {
+            Tuple<size_t> tuple1;
+            for(size_t k = 0; k < variableArguments.size();k++) {
+                if(*it == variableArguments[k]) tuple1.push_back(variablePositions[k]);
+            }
+            modePositions.push_back(tuple1);
+        }
         
         
         Relation tmpRelation1;
         tmpRelation1 = tmpRelation.cartesian_product(argRelation);
+        
+        for (size_t k = 0; k < modePositions.size(); k++) {
+            for(size_t t = 1; t < (modePositions[k].size()); t++) {
+                tmpRelation1 = tmpRelation1.select_rows_with_same_columns(modePositions[k][0], modePositions[k][t]);
+            }
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
         Relation newRelation(name, tmpRelation1.header);
         
         if(sameAttributes.size() != 0) {

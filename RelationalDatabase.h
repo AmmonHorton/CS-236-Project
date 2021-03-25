@@ -233,6 +233,10 @@ public:
                     //do stuff with queries and analyze and whatnot
                     //query is the scheme being used, and tuple is the list of arguments searched for in the given scheme
                     
+                    
+                    
+                    
+                    
                     vector<size_t> stringPositions;
                     vector<string> stringArguments;
                     vector<size_t> variablePositions;
@@ -277,6 +281,12 @@ public:
                             relation = relation.select_rows_with_same_columns(modePositions[k][0], modePositions[k][t + 1]);
                         }
                     }
+                    
+                    
+                    
+                    
+                    
+                    
                     
                     Header trimProject;
                     for(size_t k = 0; k < variablePositions.size(); k++) {
