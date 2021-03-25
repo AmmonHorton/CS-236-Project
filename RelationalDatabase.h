@@ -152,6 +152,7 @@ public:
                             if(variableTuple.size() != tmpRelation.header.size()) throw string("Rule predicate has wrong number of arguments");
                             
                             for(size_t p = 0; p < tmpRelation.header.size(); p++) {
+                                if(variableTuple[p][0] == '\'') tmpRelation = tmpRelation.select_const(p, variableTuple[p]);
                                 tmpRelation = tmpRelation.rename(tmpRelation.header[p], variableTuple[p]);
                             }
                             relationsToJoin.push_back(tmpRelation);
